@@ -10,7 +10,12 @@ from flask_cors import CORS, cross_origin
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type"]}})
+CORS(app, resources={r"/*": {
+    "origins": "*",
+    "methods": ["*"],
+    "allow_headers": ["*"],
+}}, supports_credentials=True)
+
 # Database connection setup
 def get_db_connection() -> MySQLConnection:
     config = Config()
