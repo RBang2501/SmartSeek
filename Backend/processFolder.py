@@ -6,9 +6,11 @@ import numpy as np
 import mysql.connector
 from mysql.connector import MySQLConnection
 from config import Config
+from flask_cors import CORS, cross_origin
+
 
 app = Flask(__name__)
-
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000", "methods": ["GET", "POST", "OPTIONS"], "allow_headers": ["Content-Type"]}})
 # Database connection setup
 def get_db_connection() -> MySQLConnection:
     config = Config()
@@ -77,7 +79,7 @@ def recreate_tables() -> None:
             id INT AUTO_INCREMENT PRIMARY KEY,
             file_id INT,
             embedding_type VARCHAR(255),
-            embedding_data BLOB,  # Change VECTOR to BLOB for compatibility
+            embedding_data VECTOR(128),  # Change VECTOR to BLOB for compatibility
             FOREIGN KEY (file_id) REFERENCES files(id)
         )
     ''')
@@ -111,9 +113,10 @@ def store_embeddings(file_id: int, embedding_type: str, embeddings: np.ndarray) 
     cursor = conn.cursor()
     query = f'''
     INSERT INTO embeddings (file_id, embedding_type, embedding_data) 
-    VALUES (%s, %s, %s);
+    VALUES ({file_id}, '{embedding_type}', VEC_FROM_TEXT('{embeddings.tolist()[0]}'));
     '''
-    cursor.execute(query, (file_id, embedding_type, embeddings.tobytes()))  # Store as binary data
+    print("Executing Query To Store Embedding, \n", query)
+    cursor.execute(query)
     conn.commit()
     conn.close()
 
@@ -177,15 +180,17 @@ def process_json_file(file_path: str) -> None:
     conn.commit()
     conn.close()
 
-@app.route('/process-folder', methods=['POST'])
+@app.route('/process-folder', methods=['POST', 'OPTIONS'])
 def process_folder():
+    if request.method == "OPTIONS":
+        return '', 204  # Respond OK to preflight
     data = request.json
     folder_path = data.get('path', None)
 
     if not folder_path:
         return jsonify({"error": "No folder path provided"}), 400
 
-    api_url = "https://5ef3-110-224-127-85.ngrok-free.app/permit-list/"
+    api_url = "https://074a-180-151-145-44.ngrok-free.app/permit-list/"
     output_file = "response.json"
 
     # Call the function to fetch data from the API and save it to a file
