@@ -1,8 +1,11 @@
+from flask import Flask, request, jsonify
 import requests
 import json
 import mysql.connector
 from mysql.connector import MySQLConnection
 from config import Config
+
+app = Flask(__name__)
 
 # Function to identify the type of resource described by the input text
 def identify_resource_type(text: str) -> str:
@@ -28,16 +31,11 @@ def get_text_embedding(text: str) -> list:
     if response.status_code == 200:
         data = response.json()
         embedding = data.get("embeddings", [])[0]
-        print(f"Text: {text}")
-        print(f"Embedding: {embedding}")
         
-        # Identify the resource type
+        # Identify the resource type (optional)
         resource_type = identify_resource_type(text)
-        print(f"Resource Type: {resource_type}")
-
         return embedding
     else:
-        print(f"Error: {response.status_code} - {response.text}")
         return []
 
 # Database connection setup
@@ -60,53 +58,47 @@ def get_db_connection() -> MySQLConnection:
     
     return mysql.connector.connect(**db_conf)
 
-# Function to find top 3 closest embeddings and print corresponding file paths
-def find_top_three_embeddings(input_embedding: list) -> None:
+# Function to find top 3 closest embeddings and their file paths
+def find_top_three_embeddings(input_embedding: list) -> list:
     if not input_embedding:
-        print("No embedding to search for.")
-        return
-    
+        return []
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
     # Convert input_embedding to a string format compatible with the SQL query
     input_embedding_str = json.dumps(input_embedding)
-    print(input_embedding_str)
+    
     # Query to find the top 3 closest embeddings and their associated file paths
     query = f'''
-    SELECT files.path, Vec_Cosine_Distance(embeddings.embedding_data,  VEC_FROM_TEXT('{input_embedding_str}')) AS distance 
+    SELECT files.path 
     FROM embeddings
     JOIN files ON embeddings.file_id = files.id
-    ORDER BY distance ASC
+    ORDER BY Vec_Cosine_Distance(embeddings.embedding_data, VEC_FROM_TEXT('{input_embedding_str}')) ASC
     LIMIT 3;
     '''
-
-    # Print the query for debugging
-    print(f"Executing SQL query: {query}")
 
     try:
         cursor.execute(query)
         results = cursor.fetchall()
-        print(results)
-        # Print the file paths and distances
-        for result in results:
-            file_path, distance = result
-            print(f"File Path: {file_path}, Distance: {distance}")
+        return [result[0] for result in results]  # Return only the file paths
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
-        print(f"Query: {query}")
+        return []
 
     finally:
         conn.close()
 
-if __name__ == "__main__":
-    # Example input text
-    text_input = "there are two dogs sitting in the grass with flowers in the background"
+@app.route('/respond', methods=['POST'])
+def respond():
+    data = request.json
+    input_text = data.get('message', '')
     
-    # Get embedding for the input text
-    embedding = get_text_embedding(text_input)
-    
-    # Find and print top 3 closest embeddings
-    find_top_three_embeddings(embedding)
+    embedding = get_text_embedding(input_text)
+    top_paths = find_top_three_embeddings(embedding)
 
+    return jsonify({"file_paths": top_paths})
+
+if __name__ == "__main__":
+    app.run(port=4000, debug=True)  # Ensure this matches your frontend fetch URL

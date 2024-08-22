@@ -21,37 +21,50 @@ const Home = () => {
     if (!responseFromAPI && inputPrompt.trim() !== "") {
       const newChatLogEntry = { chatPrompt: inputPrompt, botMessage: null };
       setChatLog((prevChatLog) => [...prevChatLog, newChatLogEntry]);
-
-      // hide the keyboard in mobile devices
+  
+      // Hide the keyboard on mobile devices
       e.target.querySelector("input").blur();
-
+  
       setInputPrompt(""); // Clear input after submitting
       setResponseFromAPI(true); // Indicate that a response is being awaited
-
-      try {
-        const response = await fetch("http://localhost:4000/respond", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: inputPrompt }),
-        });
-        const data = await response.json();
-
-        // Update chat log with the new response
-        setChatLog((prevChatLog) => [
-          ...prevChatLog.slice(0, prevChatLog.length - 1), // all entries except the last
-          { ...newChatLogEntry, botMessage: data.botResponse }, // update the last entry with the bot's response
-        ]);
-
-        setErr(false);
-      } catch (error) {
-        setErr(error);
-        console.error(error);
-      } finally {
-        setResponseFromAPI(false); // Reset after receiving the response
-      }
+  
+      // Simulate a delay to mimic API call
+      setTimeout(async () => {
+        try {
+          // Call the API (uncomment the below code to use the actual API)
+          /*
+          const response = await fetch("http://localhost:4000/respond", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: inputPrompt }),
+          });
+  
+          const data = await response.json();
+          */
+  
+          // Simulated mock response (remove this when using actual API)
+          const data = {
+            filePaths: ["path/to/file1.pdf", "path/to/file2.pdf", "path/to/file3.pdf"],
+          };
+  
+          // Update chat log with the API response or mock response
+          setChatLog((prevChatLog) => [
+            ...prevChatLog.slice(0, prevChatLog.length - 1), // all entries except the last
+            { ...newChatLogEntry, botMessage: data.filePaths.join(", ") }, // update the last entry with the file paths
+          ]);
+  
+          setErr(false); // No errors, set err to false
+        } catch (error) {
+          setErr(true); // Handle error case
+          console.error("API call failed:", error);
+        } finally {
+          setResponseFromAPI(false); // Reset after receiving the response
+        }
+      }, 1000);
     }
   };
-
+  
+  
   useEffect(() => {
     // Scroll to the bottom of the chat log to show the latest message
     if (chatLogEndRef.current) {
