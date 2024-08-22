@@ -1,28 +1,25 @@
 {
-  "name": "PIN-GPT",
-  "description": "Using ReactJS to build a Chrome Extension",
-  "version": "1.0.0",
-  "manifest_version": 3,
-  "author": "zhangyanping",
-  "icons": {
-    "128": "assets/images/icon.png"
-  },
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": "assets/images/icon.png"
-  },
-  "background": { "service_worker": "./background.js" },
-  "content_scripts": [
+  "short_name": "React App",
+  "name": "Create React App Sample",
+  "icons": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["./inject_script.js"],
-      "run_at": "document_start"
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ],
-  "options_ui": {
-    "page": "./options.html",
-    "open_in_tab": true
-  },
-  "permissions": ["proxy", "contentSettings", "activeTab"],
-  "host_permissions": ["*://*/*"]
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
 }
