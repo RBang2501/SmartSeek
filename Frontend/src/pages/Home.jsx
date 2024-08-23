@@ -5,7 +5,8 @@ import Error from "../components/Error";
 import IntroSection from "../components/IntroSection";
 import Loading from "../components/Loading";
 import NavContent from "../components/NavContent";
-import SvgComponent from "../components/SvgComponent";
+import { ReactComponent as ArrowIcon } from '../arrow.svg'; // Adjust the path accordingly
+import "./Home.css";
 
 const Home = () => {
   const [showMenu, setShowMenu] = useState(false);
@@ -13,13 +14,16 @@ const Home = () => {
   const [chatLog, setChatLog] = useState([]);
   const [err, setErr] = useState(false);
   const [responseFromAPI, setResponseFromAPI] = useState(false);
+  const [animatedText, setAnimatedText] = useState("Seek");
+  const [fade, setFade] = useState(false); // State for fade effect
 
   const chatLogEndRef = useRef(null);
+  const textOptions = ["Seek", "Find", "Search"];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!responseFromAPI && inputPrompt.trim() !== "") {
-      const newChatLogEntry = { chatPrompt: inputPrompt, botMessage: null };
+      const newChatLogEntry = { id: Date.now(), chatPrompt: inputPrompt, botMessage: null }; // Ensure unique ID
       setChatLog((prevChatLog) => [...prevChatLog, newChatLogEntry]);
   
       // Hide the keyboard on mobile devices
@@ -31,31 +35,15 @@ const Home = () => {
       // Simulate a delay to mimic API call
       setTimeout(async () => {
         try {
-          // Call the API (uncomment the below code to use the actual API)
-          const response = await fetch("http://localhost:4000/respond", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: inputPrompt }),
-          });
-  
-          const resp = await response.json();
-          console.log(resp.file_paths)
-          const data = resp
           // Simulated mock response (remove this when using actual API)
-          // const data = {
-          //   file_paths: ["path/to/file1.pdf", "path/to/file2.pdf", "path/to/file3.pdf"],
-          // };
+          const data = {
+            filePaths: ["path/to/file1.pdf", "path/to/file2.pdf", "path/to/file3.pdf"],
+          };
   
           // Update chat log with the API response or mock response
           setChatLog((prevChatLog) => [
-            ...prevChatLog.slice(0, prevChatLog.length - 1), // All entries except the last
-            { 
-              ...newChatLogEntry, 
-              botMessage: "Top Matches are:\n" + 
-                [...new Set(data.file_paths)] // Remove duplicates
-                  .map((path, index) => `${index + 1}) ${path}`)
-                  .join("\n")
-            } // Update the last entry with the formatted and unique file paths
+            ...prevChatLog.slice(0, prevChatLog.length - 1), // all entries except the last
+            { ...newChatLogEntry, botMessage: data.filePaths.join(", ") }, // update the last entry with the file paths
           ]);
   
           setErr(false); // No errors, set err to false
@@ -69,7 +57,25 @@ const Home = () => {
     }
   };
   
-  
+
+  // Change animated text at intervals
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setFade(true); // Trigger fade out
+
+      setTimeout(() => {
+        setAnimatedText((prev) => {
+          const currentIndex = textOptions.indexOf(prev);
+          return textOptions[(currentIndex + 1) % textOptions.length];
+        });
+        setFade(false); // Trigger fade in
+      }, 500); // Wait for fade out before changing text
+
+    }, 2000); // Change text every 2 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
+  }, []);
+
   useEffect(() => {
     // Scroll to the bottom of the chat log to show the latest message
     if (chatLogEndRef.current) {
@@ -98,7 +104,7 @@ const Home = () => {
             </svg>
           </button>
         </div>
-        <h1>TalkBot</h1>
+        <h1>Smart-Seek</h1>
       </header>
 
       {showMenu && (
@@ -128,6 +134,13 @@ const Home = () => {
       )}
 
       <aside className="sideMenu">
+        <h2 className="appName">
+          <span className="firstLetter">S</span>mart{" "}
+          <span className={`animatedText ${fade ? 'fade-out' : 'fade-in'}`}>
+            <span className="firstLetter">{animatedText.charAt(0)}</span>
+            {animatedText.slice(1)}
+          </span>
+        </h2> {/* Display animated text */}
         <NavContent
           chatLog={chatLog}
           setChatLog={setChatLog}
@@ -172,35 +185,20 @@ const Home = () => {
         ) : (
           <IntroSection />
         )}
-
         <form onSubmit={handleSubmit}>
           <div className="inputPromptWrapper">
-            <input
+            <textarea
               name="inputPrompt"
-              id=""
               className="inputPrompttTextarea"
-              type="text"
               rows="1"
               value={inputPrompt}
-              onChange={(e) => setInputPrompt(e.target.value)}
-              autoFocus
-            ></input>
-            <button aria-label="form submit" type="submit">
-              <svg
-                fill="#ADACBF"
-                width={15}
-                height={20}
-                viewBox="0 0 32 32"
-                xmlns="http://www.w3.org/2000/svg"
-                stroke="#212023"
-                strokeWidth={0}
-              >
-                <title>{"submit form"}</title>
-                <path
-                  d="m30.669 1.665-.014-.019a.73.73 0 0 0-.16-.21h-.001c-.013-.011-.032-.005-.046-.015-.02-.016-.028-.041-.05-.055a.713.713 0 0 0-.374-.106l-.05.002h.002a.628.628 0 0 0-.095.024l.005-.001a.76.76 0 0 0-.264.067l.005-.002-27.999 16a.753.753 0 0 0 .053 1.331l.005.002 9.564 4.414v6.904a.75.75 0 0 0 1.164.625l-.003.002 6.259-4.106 9.015 4.161c.092.043.2.068.314.068H28a.75.75 0 0 0 .747-.695v-.002l2-27.999c.001-.014-.008-.025-.008-.039l.001-.032a.739.739 0 0 0-.073-.322l.002.004zm-4.174 3.202-14.716 16.82-8.143-3.758zM12.75 28.611v-4.823l4.315 1.992zm14.58.254-8.32-3.841c-.024-.015-.038-.042-.064-.054l-5.722-2.656 15.87-18.139z"
-                  stroke="none"
-                />
-              </svg>
+              onChange={(e) => {
+                setInputPrompt(e.target.value);
+              }} // Directly manage input changes here
+              placeholder="Write the file description..." // Add placeholder here
+            />
+            <button aria-label="form submit" type="submit" className="submitButton">
+              <ArrowIcon className="arrowIcon" width={36} height={36} />
             </button>
           </div>
         </form>
