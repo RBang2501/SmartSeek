@@ -10,18 +10,19 @@ const NewChat = ({ setChatLog, setShowMenu }) => {
 
     if (files.length > 0) {
       // Extract the folder path from the first file's webkitRelativePath
-      const folderPath = files[0].webkitRelativePath.split("/").slice(0, -1).join("/");
+      console.log(files[0])
+      var folderPath = files[0].webkitRelativePath.split("/").slice(0, -1).join("/");
+      folderPath  = "/Users/shreyanshrai/Desktop/" + folderPath
       console.log(`Selected folder path: ${folderPath}`);
 
       // Prepare the payload for the Flask server
       const payload = {
         path: folderPath,
       };
-
       try {
         // Make the API request to the Flask server
         const response = await axios.post(
-          "http://localhost:5000/process-folder", // Update to your Flask server endpoint
+          "http://127.0.0.1:5000/process-folder", // Update to your Flask server endpoint
           payload
         );
 

@@ -75,7 +75,7 @@ def find_top_three_embeddings(input_embedding: list) -> list:
     FROM embeddings
     JOIN files ON embeddings.file_id = files.id
     ORDER BY Vec_Cosine_Distance(embeddings.embedding_data, VEC_FROM_TEXT('{input_embedding_str}')) ASC
-    LIMIT 3;
+    LIMIT 5;
     '''
 
     try:
