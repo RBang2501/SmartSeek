@@ -27,7 +27,7 @@ const Home = () => {
       setChatLog((prevChatLog) => [...prevChatLog, newChatLogEntry]);
   
       // Hide the keyboard on mobile devices
-      e.target.querySelector("input").blur();
+      // e.target.querySelector("input").blur();
   
       setInputPrompt(""); // Clear input after submitting
       setResponseFromAPI(true); // Indicate that a response is being awaited
@@ -36,14 +36,26 @@ const Home = () => {
       setTimeout(async () => {
         try {
           // Simulated mock response (remove this when using actual API)
-          const data = {
-            filePaths: ["path/to/file1.pdf", "path/to/file2.pdf", "path/to/file3.pdf"],
-          };
+          const response = await fetch("http://localhost:4000/respond", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: inputPrompt }),
+          });
+  
+          const resp = await response.json();
+          console.log(resp.file_paths)
+          const data = resp
   
           // Update chat log with the API response or mock response
           setChatLog((prevChatLog) => [
-            ...prevChatLog.slice(0, prevChatLog.length - 1), // all entries except the last
-            { ...newChatLogEntry, botMessage: data.filePaths.join(", ") }, // update the last entry with the file paths
+            ...prevChatLog.slice(0, prevChatLog.length - 1), // All entries except the last
+            { 
+              ...newChatLogEntry, 
+              botMessage: "Top Matches are:\n" + 
+                [...new Set(data.file_paths)] // Remove duplicates
+                  .map((path, index) => `${index + 1}) ${path}`)
+                  .join("\n")
+            } // Update the last entry with the formatted and unique file paths
           ]);
   
           setErr(false); // No errors, set err to false

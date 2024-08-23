@@ -149,7 +149,7 @@ const SignupForm = () => {
             />
           </svg>
         </i>
-        Continue with Goggle
+        Continue with Google
       </button>
     </div>
   );
