@@ -195,7 +195,7 @@ def process_folder():
     if not folder_path:
         return jsonify({"error": "No folder path provided"}), 400
 
-    api_url = "https://074a-180-151-145-44.ngrok-free.app/permit-list/"
+    api_url = "http://localhost:8001/permit-list/"
     output_file = "response.json"
 
     # Call the function to fetch data from the API and save it to a file
