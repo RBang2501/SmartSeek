@@ -50,25 +50,51 @@ Smart Seek leverages advanced AI models and TiDB’s vector database to enable a
     npm start
     ```
 
-## CORS Issues
+6. **Handling CORS Issues:**
+   If you encounter CORS issues, you can bypass them by launching your browser with web security disabled:
+   - **Windows:**
+     ```bash
+     chrome.exe --user-data-dir="C://Chrome dev session" --disable-web-security
+     ```
+   - **OSX:**
+     ```bash
+     open -n -a /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args --user-data-dir="/tmp/chrome_dev_test" --disable-web-security
+     ```
+   - **Linux:**
+     ```bash
+     google-chrome --disable-web-security
+     ```
 
-If you encounter CORS issues, you can bypass them by launching your browser with web security disabled. Follow the steps below based on your operating system:
+7. **Firebase Integration:**
 
-- **Windows:**
-  1. Open Start window
-  2. Search Run and open it or press Window + R
-  3. Paste `chrome.exe --user-data-dir="C://Chrome dev session" --disable-web-security` and execute it
-  4. This will open a new browser with web security disabled. You can now access your project in this browser without worrying about CORS errors.
+   To enable Google Sign-In, you need to set up Firebase:
 
-- **OSX:**
-  Run the following command in the terminal:
-  ```bash
-  open -n -a /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args --user-data-dir="/tmp/chrome_dev_test" --disable-web-security
-  ```
+   **a. Create a Firebase Project:**
+   - Go to [Firebase Console](https://console.firebase.google.com/).
+   - Click "Add project" and follow the steps to create a new project.
 
+   **b. Register Your App:**
+   - Click on the Web icon `</>` to add a web app.
+   - Register your app and copy the Firebase configuration snippet provided.
 
-  - **Linux:**
-  Run the following command in the terminal:
-  ```
-  google-chrome --disable-web-security
-  ```
+   **c. Enable Google Authentication:**
+   - In the Firebase console, go to the "Authentication" section.
+   - Click "Sign-in method" and enable "Google."
+   - Click "Save" to apply changes.
+
+   **d. Create and Configure `.env` File:**
+   - In the root directory of your frontend project, create a `.env` file.
+   - Add the following Firebase configuration:
+     ```plaintext
+     REACT_APP_FIREBASE_KEY=your_api_key
+     REACT_APP_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+     REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+     REACT_APP_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+     REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+     REACT_APP_FIREBASE_APP_ID=your_app_id
+     REACT_APP_FIREBASE_MEASUREMENT_ID=your_measurement_id
+     ```
+   - Replace placeholders with actual values from your Firebase configuration.
+
+8. **Restart Your Frontend Server:**
+   - Restart the frontend server to apply the new environment variables.
